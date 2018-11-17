@@ -8,5 +8,4 @@ Based on the 2017 report we should at least include:
 
 
 TODO:
-- address imbalance
-
+- address imbalance training set
