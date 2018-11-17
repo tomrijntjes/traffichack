@@ -1,9 +1,9 @@
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-
+from sklearn.metrics import f1_score
 #extract accident_id, 1st_road_class, speed_limit, road_surface_conditions, target
-accident_columns = ["accident_id", "1st_road_class", "speed_limit", "road_surface_conditions"]
+accident_columns = ["accident_id", "1st_road_class", "speed_limit", "road_surface_conditions","time"]
 vehicle_columns = ["accident_id","Vehicle_Type","Age_of_Driver"] #note, age of driver isn't always available
 
 accidents_train = pd.read_csv("data/train.csv", usecols=accident_columns+["target"])
@@ -13,6 +13,11 @@ vehicles = pd.read_csv("data/vehicles.csv", usecols=vehicle_columns)
 #join and drop empty values (driver age)
 train = accidents_train.merge(vehicles, on='accident_id',suffixes=('_accidents','_vehicles')).dropna()
 unknown = accidents_unknown.merge(vehicles, on='accident_id',suffixes=('_accidents','_vehicles')).dropna()
+
+#create 24 hour buckets
+train['time'] = train['time'].apply(lambda x: int(x.split(":")[0]))
+unknown['time'] = unknown['time'].apply(lambda x: int(x.split(":")[0]))
+
 
 #split features and target
 target = pd.factorize(train["target"])[0]
@@ -29,7 +34,7 @@ clf = RandomForestClassifier(n_jobs=2, random_state=0)
 
 clf.fit(X_train, y_train)
 
-print(clf.score(X_test,y_test))
+print(f1_score(y_test, clf.predict(X_test)))
 
 #drop values where driver's age isn't available
 
